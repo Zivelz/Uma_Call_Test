@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Ms. VICTORIA - 라이브 콜 가이드 플레이어</title>
+  <title>Ms. VICTORIA - 1줄 싱크 라이브 콜 가이드</title>
   <style>
     :root {
       --bg: #090b14;
       --card-bg: rgba(18, 24, 43, 0.85);
       --card-border: rgba(255, 255, 255, 0.08);
-      --card-active-bg: rgba(28, 38, 70, 0.95);
+      --card-active-bg: rgba(30, 42, 77, 0.95);
       --card-active-border: #facc15;
       
-      /* 요청 컬러 팔레트 */
       --color-action: #fde047;  /* 1단 동작: 노란색 */
       --color-jp: #ffffff;      /* 2단 원문: 흰색 */
       --color-kr: #38bdf8;      /* 3단 번역: 파란색 */
@@ -77,7 +76,7 @@
       font-weight: 600;
     }
 
-    /* 메인 뷰포트 레이아웃 */
+    /* 메인 분할 뷰포트 */
     main {
       flex: 1;
       display: grid;
@@ -159,7 +158,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       scroll-behavior: smooth;
     }
     .timeline-section::-webkit-scrollbar { width: 6px; }
@@ -167,7 +166,7 @@
     .timeline-section::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
     .timeline-section::-webkit-scrollbar-thumb:hover { background: var(--color-action); }
 
-    /* 모바일 반응형: 상하 분할 스크롤 */
+    /* 모바일 반응형 분할 */
     @media (max-width: 900px) {
       main {
         display: flex;
@@ -191,17 +190,17 @@
       }
     }
 
-    /* 카드 스타일 (2줄 가사 최적화) */
+    /* 1줄 카드 스타일 */
     .lyric-card {
       width: 100%;
       max-width: 700px;
       background: var(--card-bg);
       backdrop-filter: blur(12px);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 16px 20px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 14px;
+      padding: 12px 18px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
       position: relative;
       display: flex;
@@ -217,7 +216,7 @@
     .lyric-card.active {
       background: var(--card-active-bg);
       border-color: var(--card-active-border);
-      box-shadow: 0 0 24px rgba(250, 204, 21, 0.35);
+      box-shadow: 0 0 20px rgba(250, 204, 21, 0.35);
       transform: scale(1.015);
     }
 
@@ -226,9 +225,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-sub);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       padding-bottom: 4px;
       border-bottom: 1px dashed rgba(255,255,255,0.06);
     }
@@ -241,7 +240,7 @@
       color: var(--color-action);
       font-family: monospace;
       font-weight: 700;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
     }
 
     .card-tools {
@@ -269,7 +268,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
 
     .field-row {
@@ -279,39 +278,34 @@
       white-space: pre-wrap;
       font-family: "Consolas", "Courier New", "Noto Sans Mono", monospace, sans-serif;
       min-height: 0;
-      line-height: 1.5;
+      line-height: 1.4;
       text-align: center;
     }
 
-    /* 1. 동작 액션 (노란색) */
-    .row-action { color: var(--color-action); font-size: 0.92rem; font-weight: 700; }
-    /* 2. 일본어 원문 (흰색, 2줄 대형 폰트) */
-    .row-jp { color: var(--color-jp); font-size: 1.15rem; font-weight: 800; }
-    /* 3. 한국어 번역 (파란색) */
-    .row-kr { color: var(--color-kr); font-size: 0.96rem; font-weight: 600; }
-    /* 4. 독음 (보라색) */
-    .row-pron { color: var(--color-pron); font-size: 0.9rem; font-weight: 500; }
-    /* 5. 콜 파트 (핑크) */
-    .row-call { color: var(--color-call); font-size: 1.05rem; font-weight: 800; }
+    .row-action { color: var(--color-action); font-size: 0.9rem; font-weight: 700; }
+    .row-jp { color: var(--color-jp); font-size: 1.1rem; font-weight: 800; }
+    .row-kr { color: var(--color-kr); font-size: 0.94rem; font-weight: 600; }
+    .row-pron { color: var(--color-pron); font-size: 0.88rem; font-weight: 500; }
+    .row-call { color: var(--color-call); font-size: 1.02rem; font-weight: 800; }
 
-    /* 빈 텍스트 행 완전 숨김 */
+    /* 빈 행 숨김 */
     body:not(.is-editing) .field-row:empty {
       display: none !important;
     }
 
-    /* 편집 모드 스타일 */
+    /* 편집 모드 점선 복원 */
     body.is-editing .field-row {
-      min-height: 26px;
-      padding: 3px 8px;
+      min-height: 24px;
+      padding: 2px 6px;
       border: 1px dashed rgba(255, 255, 255, 0.2);
       border-radius: 6px;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
     body.is-editing .field-row:empty::after {
       content: attr(data-placeholder);
       color: rgba(255, 255, 255, 0.3);
       font-style: italic;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
     }
     body.is-editing .badge-time {
       border-bottom: 1px dashed var(--color-action);
@@ -319,7 +313,7 @@
       cursor: text;
     }
 
-    /* 토글 스위치에 따른 숨김 */
+    /* 토글 스위치 */
     body.hide-action .row-action { display: none !important; }
     body.hide-jp .row-jp { display: none !important; }
     body.hide-kr .row-kr { display: none !important; }
@@ -332,7 +326,7 @@
   <header>
     <div class="header-title">
       <h1>Ms. VICTORIA Live Call Guide</h1>
-      <span>2-Line Synchronized Stage Player</span>
+      <span>1-Line Precise Sync Player</span>
     </div>
 
     <div class="toggle-bar">
@@ -345,17 +339,13 @@
   </header>
 
   <main>
-    <!-- 좌측 고정 비디오 패널 -->
     <section class="player-section">
       <div class="video-wrapper">
-        <iframe id="yt-player" 
-                src="https://www.youtube-nocookie.com/embed/vsnyQd6Ur-M?enablejsapi=1&origin=https://localhost" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen></iframe>
+        <div id="yt-player"></div>
       </div>
 
       <div class="status-panel">
-        <span id="sync-status">Ready</span>
+        <span id="sync-status">연결 준비 중</span>
         <span id="time-display">00:00.0 / 00:00.0</span>
       </div>
 
@@ -366,244 +356,92 @@
       </div>
     </section>
 
-    <!-- 우측 독립 스크롤 2줄 카드 리스트 -->
     <section class="timeline-section" id="cards-container">
-      <!-- 자바스크립트로 렌더링 -->
+      <!-- 동적 카드 렌더링 -->
     </section>
   </main>
 
   <script>
-    // 가사를 시인성 높은 2줄 단위로 분할하여 매핑한 전체 카드 데이터
+    // 1줄 단위로 분할된 40개 정밀 카드 데이터
     let cardsData = [
-      {
-        time: 14.0,
-        action: "",
-        jp: "響き渡れ凱歌よ (どこまでも)\n開かれた未来はもう (この手へと)",
-        kr: "울려 퍼져라 승리의 함성이여 (어디까지나)\n열린 미래는 이미 (이 손으로)",
-        pron: "히비키와타레 가이카요 (도코마데모)\n히라카레타 미라이와 모- (코노 테에토)",
-        call: ""
-      },
-      {
-        time: 27.5,
-        action: "",
-        jp: "鮮烈な日々を駆けた 夢と切り合って攻防戦、\n丁々発止ちっぽけな勇気の手を",
-        kr: "선렬한 나날을 달렸다 꿈과 맞부딪치는 공방전,\n치열하게 주고받으며 보잘것없는 용기의 손을",
-        pron: "센레츠나 히비오 카케타 유메토 키리앗테 코-보-센,\n초-초-핫시 칫포케나 유-키노 테오",
-        call: ""
-      },
-      {
-        time: 34.8,
-        action: "",
-        jp: "一連托生にPlay a game！\n聞け、鬨の声",
-        kr: "운명공동체로 Play a game!\n들어라, 승리의 함성을",
-        pron: "이치렌타쿠쇼-니 Play a game!\n키케, 토키노 코에",
-        call: ""
-      },
-      {
-        time: 41.5,
-        action: "",
-        jp: "雨に風 荒くれて\n自分さえ見えなくて",
-        kr: "비바람이 사납게 몰아치고\n나 자신조차 보이지 않아도",
-        pron: "아메니 카제 아라쿠레테\n지분사에 미에나쿠테",
-        call: ""
-      },
-      {
-        time: 48.0,
-        action: "",
-        jp: "あの時の 眼差しよ\nそのまま突き進め",
-        kr: "그때 품었던 눈빛이여\n그대로 올곧게 전진하라",
-        pron: "아노 토키노 마나자시요\n소노마마 츠키스스메",
-        call: ""
-      },
-      {
-        time: 55.0,
-        action: "",
-        jp: "涙超えて疾りきった先に… あまねく勝利\n嘗てない時代",
-        kr: "눈물을 넘어 끝까지 질주한 저편에… 널리 퍼진 승리\n전례 없는 시대",
-        pron: "나미다 코에테 하시리킷타 사키니… 아마네쿠 쇼-리\n카츠테나이 지다이",
-        call: ""
-      },
-      {
-        time: 63.5,
-        action: "",
-        jp: "その中心に立ってる (立ってた)私\n響かせようよ凱歌を",
-        kr: "그 한가운데에 서 있는 (서 있었던) 나\n울려 퍼지게 하자 승리의 함성을",
-        pron: "소노 츄-신니 탓테루 (탓테타) 와타시\n히비카세요-요 가이카오",
-        call: ""
-      },
-      {
-        time: 71.0,
-        action: "",
-        jp: "どこまでも Ah\n遮る物のない地平へ",
-        kr: "어디까지나 Ah\n가로막는 것 하나 없는 지평선으로",
-        pron: "도코마데모 Ah\n사에기루 모노노 나이 치헤이에",
-        call: ""
-      },
-      {
-        time: 78.0,
-        action: "",
-        jp: "開かれた未来はもう\n揺るぎのない Place",
-        kr: "열린 미래는 이미\n흔들림 없는 곳 (Place)",
-        pron: "히라카레타 미라이와 모-\n유루기노 나이 Place",
-        call: ""
-      },
-      {
-        time: 85.0,
-        action: "",
-        jp: "天上天下そう讃えてる\nI've got pride and dreams",
-        kr: "천상천하 그렇게 칭송하고 있어\nI've got pride and dreams",
-        pron: "텐쇼-텐게 소- 타타에테루\nI've got pride and dreams",
-        call: ""
-      },
-      {
-        time: 92.5,
-        action: "",
-        jp: "さあ、笑顔を見せて\n刻まれたんだ",
-        kr: "자, 환한 미소를 보여줘\n깊이 새겨진 거야",
-        pron: "사-, 에가오오 미세테\n키자마레탄다",
-        call: ""
-      },
-      {
-        time: 99.0,
-        action: "",
-        jp: "My history, my victory！\n天賦の才 あるとすれば",
-        kr: "My history, my victory!\n타고난 천부의 재능이 있다면",
-        pron: "My history, my victory!\n템푸노 사이 아루토 스레바",
-        call: ""
-      },
-      {
-        time: 108.0,
-        action: "",
-        jp: "決して諦めないハートかも知れない\n英雄になりたい訳じゃないんだ",
-        kr: "결코 포기하지 않는 마음일지도 몰라\n영웅이 되고 싶은 건 아니야",
-        pron: "켓시테 아키라메나이 하-토카모 시레나이\n에-유-니 나리타이 와케쟈 나인다",
-        call: ""
-      },
-      {
-        time: 116.5,
-        action: "",
-        jp: "ただ、その軌跡\n希望と呼ばれるだけ",
-        kr: "그저, 달려온 그 궤적이\n희망이라 불릴 뿐",
-        pron: "타다, 소노 키세키\n키보-토 요바레루 다케",
-        call: ""
-      },
-      {
-        time: 125.0,
-        action: "",
-        jp: "(Wow oh oh I'm the winner！)\n誇って Glory...",
-        kr: "(Wow oh oh I'm the winner!)\n자랑스러워해라 Glory...",
-        pron: "(Wow oh oh I'm the winner!)\n호콧테 Glory...",
-        call: ""
-      },
-      {
-        time: 133.0,
-        action: "",
-        jp: "たった一人たどり着いた\n約束の場所にいると",
-        kr: "오직 홀로 당당히 도달한\n약속된 자리에 서 있다고",
-        pron: "탓타 히토리 타도리츠이타\n야쿠소쿠노 바쇼니 이루토",
-        call: ""
-      },
-      {
-        time: 140.0,
-        action: "",
-        jp: "Yes, I am the winner！\nそよぐ風 嬉しそうに",
-        kr: "Yes, I am the winner!\n살랑이는 바람이 기쁜 듯이",
-        pron: "Yes, I am the winner!\n소요구 카제 우레시소-니",
-        call: ""
-      },
-      {
-        time: 147.0,
-        action: "",
-        jp: "祝福 ささやいた\n手合わせた 眼差しに",
-        kr: "축복을 속삭였어\n서로 맞닿은 눈빛에",
-        pron: "슈쿠후쿠 사사야이타\n테 아와세타 마나자시니",
-        call: ""
-      },
-      {
-        time: 154.0,
-        action: "",
-        jp: "背中を押されたら\n踏み出そうか疾りきった先へ… あまねく勝利",
-        kr: "등을 힘껏 밀어준다면\n내디뎌 볼까 끝까지 질주한 저편으로… 널리 퍼진 승리",
-        pron: "세나카오 오사레타라\n후미다소-카 하시리킷타 사키에… 아마네쿠 쇼-리",
-        call: ""
-      },
-      {
-        time: 163.0,
-        action: "",
-        jp: "嘗てない時代\nその中心に立ってる (立ってた)私",
-        kr: "전례 없는 시대\n그 한가운데에 서 있는 (서 있었던) 나",
-        pron: "카츠테나이 지다이\n소노 츄-신니 탓테루 (탓테타) 와타시",
-        call: ""
-      },
-      {
-        time: 171.0,
-        action: "",
-        jp: "響かせようよ凱歌を\nどこまでも Ah",
-        kr: "울려 퍼지게 하자 승리의 함성을\n어디까지나 Ah",
-        pron: "히비카세요-요 가이카오\n도코마데모 Ah",
-        call: ""
-      },
-      {
-        time: 178.5,
-        action: "",
-        jp: "遮る物のない地平へ\n開かれた未来はもう",
-        kr: "가로막는 것 하나 없는 지평선으로\n열린 미래는 이미",
-        pron: "사에기루 모노노 나이 치헤이에\n히라카레타 미라이와 모-",
-        call: ""
-      },
-      {
-        time: 186.0,
-        action: "",
-        jp: "揺るぎのない Place\n天上天下そう讃えてる",
-        kr: "흔들림 없는 곳 (Place)\n천상천하 그렇게 칭송하고 있어",
-        pron: "유루기노 나이 Place\n텐쇼-텐게 소- 타타에테루",
-        call: ""
-      },
-      {
-        time: 194.0,
-        action: "",
-        jp: "I've got pride and dreams\nさあ、笑顔を見せて",
-        kr: "I've got pride and dreams\n자, 환한 미소를 보여줘",
-        pron: "I've got pride and dreams\n사-, 에가오오 미세테",
-        call: ""
-      },
-      {
-        time: 202.0,
-        action: "",
-        jp: "刻まれたんだ\nMy history, my victory！",
-        kr: "깊이 새겨진 거야\nMy history, my victory!",
-        pron: "키자마레탄다\nMy history, my victory!",
-        call: ""
-      },
-      {
-        time: 215.0,
-        action: "",
-        jp: "響き渡れ凱歌よ (どこまでも)\n開かれた未来はもう (この手へと)",
-        kr: "울려 퍼져라 승리의 함성이여 (어디까지나)\n열린 미래는 이미 (이 손으로)",
-        pron: "히비키와타레 가이카요 (도코마데모)\n히라카레타 미라이와 모- (코노 테에토)",
-        call: ""
-      },
-      {
-        time: 228.0,
-        action: "",
-        jp: "Ms. VICTORIA\n",
-        kr: "Ms. VICTORIA\n",
-        pron: "미스 빅토리아\n",
-        call: ""
-      }
+      { time: 14.0, action: "", jp: "響き渡れ凱歌よ (どこまでも)", kr: "울려 퍼져라 승리의 함성이여 (어디까지나)", pron: "히비키와타레 가이카요 (도코마데모)", call: "" },
+      { time: 21.0, action: "", jp: "開かれた未来はもう (この手へと)", kr: "열린 미래는 이미 (이 손으로)", pron: "히라카레타 미라이와 모- (코노 테에토)", call: "" },
+      { time: 27.5, action: "", jp: "鮮烈な日々を駆けた 夢と切り合って攻防戦、", kr: "선렬한 나날을 달렸다 꿈과 맞부딪치는 공방전,", pron: "센레츠나 히비오 카케타 유메토 키리앗테 코-보-센,", call: "" },
+      { time: 31.5, action: "", jp: "丁々発止ちっぽけな勇気の手を", kr: "치열하게 주고받으며 보잘것없는 용기의 손을", pron: "초-초-핫시 칫포케나 유-키노 테오", call: "" },
+      { time: 34.8, action: "", jp: "一連托生にPlay a game！", kr: "운명공동체로 Play a game!", pron: "이치렌타쿠쇼-니 Play a game!", call: "" },
+      { time: 38.0, action: "", jp: "聞け、鬨の声", kr: "들어라, 승리의 함성을", pron: "키케, 토키노 코에", call: "" },
+      { time: 41.5, action: "", jp: "雨に風 荒くれて", kr: "비바람이 사납게 몰아치고", pron: "아메니 카제 아라쿠레테", call: "" },
+      { time: 44.8, action: "", jp: "自分さえ見えなくて", kr: "나 자신조차 보이지 않아도", pron: "지분사에 미에나쿠테", call: "" },
+      { time: 48.0, action: "", jp: "あの時の 眼差しよ", kr: "그때 품었던 눈빛이여", pron: "아노 토키노 마나자시요", call: "" },
+      { time: 51.5, action: "", jp: "そのまま突き進め", kr: "그대로 올곧게 전진하라", pron: "소노마마 츠키스스메", call: "" },
+      { time: 55.0, action: "", jp: "涙超えて疾りきった先に… あまねく勝利", kr: "눈물을 넘어 끝까지 질주한 저편에… 널리 퍼진 승리", pron: "나미다 코에테 하시리킷타 사키니… 아마네쿠 쇼-리", call: "" },
+      { time: 60.5, action: "", jp: "嘗てない時代", kr: "전례 없는 시대", pron: "카츠테나이 지다이", call: "" },
+      { time: 63.5, action: "", jp: "その中心に立ってる (立ってた)私", kr: "그 한가운데에 서 있는 (서 있었던) 나", pron: "소노 츄-신니 탓테루 (탓테타) 와타시", call: "" },
+      { time: 67.5, action: "", jp: "響かせようよ凱歌を", kr: "울려 퍼지게 하자 승리의 함성을", pron: "히비카세요-요 가이카오", call: "" },
+      { time: 71.0, action: "", jp: "どこまでも Ah", kr: "어디까지나 Ah", pron: "도코마데모 Ah", call: "" },
+      { time: 74.5, action: "", jp: "遮る物のない地平へ", kr: "가로막는 것 하나 없는 지평선으로", pron: "사에기루 모노노 나이 치헤이에", call: "" },
+      { time: 78.0, action: "", jp: "開かれた未来はもう", kr: "열린 미래는 이미", pron: "히라카레타 미라이와 모-", call: "" },
+      { time: 81.5, action: "", jp: "揺るぎのない Place", kr: "흔들림 없는 곳 (Place)", pron: "유루기노 나이 Place", call: "" },
+      { time: 85.0, action: "", jp: "天上天下そう讃えてる", kr: "천상천하 그렇게 칭송하고 있어", pron: "텐쇼-텐게 소- 타타에테루", call: "" },
+      { time: 88.5, action: "", jp: "I've got pride and dreams", kr: "I've got pride and dreams", pron: "I've got pride and dreams", call: "" },
+      { time: 92.5, action: "", jp: "さあ、笑顔を見せて", kr: "자, 환한 미소를 보여줘", pron: "사-, 에가오오 미세테", call: "" },
+      { time: 96.0, action: "", jp: "刻まれたんだ", kr: "깊이 새겨진 거야", pron: "키자마레탄다", call: "" },
+      { time: 99.0, action: "", jp: "My history, my victory！", kr: "My history, my victory!", pron: "My history, my victory!", call: "" },
+      { time: 104.5, action: "", jp: "天賦の才 あるとすれば", kr: "타고난 천부의 재능이 있다면", pron: "템푸노 사이 아루토 스레바", call: "" },
+      { time: 108.0, action: "", jp: "決して諦めないハートかも知れない", kr: "결코 포기하지 않는 마음일지도 몰라", pron: "켓시테 아키라메나이 하-토카모 시레나이", call: "" },
+      { time: 112.5, action: "", jp: "英雄になりたい訳じゃないんだ", kr: "영웅이 되고 싶은 건 아니야", pron: "에-유-니 나리타이 와케쟈 나인다", call: "" },
+      { time: 116.5, action: "", jp: "ただ、その軌跡", kr: "그저, 달려온 그 궤적이", pron: "타다, 소노 키세키", call: "" },
+      { time: 120.0, action: "", jp: "希望と呼ばれるだけ", kr: "희망이라 불릴 뿐", pron: "키보-토 요바레루 다케", call: "" },
+      { time: 125.0, action: "", jp: "(Wow oh oh I'm the winner！)", kr: "(Wow oh oh I'm the winner!)", pron: "(Wow oh oh I'm the winner!)", call: "" },
+      { time: 129.0, action: "", jp: "誇って Glory...", kr: "자랑스러워해라 Glory...", pron: "호콧테 Glory...", call: "" },
+      { time: 133.0, action: "", jp: "たった一人たどり着いた", kr: "오직 홀로 당당히 도달한", pron: "탓타 히토리 타도리츠이타", call: "" },
+      { time: 136.5, action: "", jp: "約束の場所にいると", kr: "약속된 자리에 서 있다고", pron: "야쿠소쿠노 바쇼니 이루토", call: "" },
+      { time: 140.0, action: "", jp: "Yes, I am the winner！", kr: "Yes, I am the winner!", pron: "Yes, I am the winner!", call: "" },
+      { time: 143.5, action: "", jp: "そよぐ風 嬉しそうに", kr: "살랑이는 바람이 기쁜 듯이", pron: "소요구 카제 우레시소-니", call: "" },
+      { time: 147.0, action: "", jp: "祝福 ささやいた", kr: "축복을 속삭였어", pron: "슈쿠후쿠 사사야이타", call: "" },
+      { time: 150.5, action: "", jp: "手合わせた 眼差しに", kr: "서로 맞닿은 눈빛에", pron: "테 아와세타 마나자시니", call: "" },
+      { time: 154.0, action: "", jp: "背中を押されたら", kr: "등을 힘껏 밀어준다면", pron: "세나카오 오사레타라", call: "" },
+      { time: 157.5, action: "", jp: "踏み出そうか疾りきった先へ… あまねく勝利", kr: "내디뎌 볼까 끝까지 질주한 저편으로… 널리 퍼진 승리", pron: "후미다소-카 하시리킷타 사키에… 아마네쿠 쇼-리", call: "" },
+      { time: 163.0, action: "", jp: "嘗てない時代", kr: "전례 없는 시대", pron: "카츠테나이 지다이", call: "" },
+      { time: 166.5, action: "", jp: "その中心に立ってる (立ってた)私", kr: "그 한가운데에 서 있는 (서 있었던) 나", pron: "소노 츄-신니 탓테루 (탓테타) 와타시", call: "" },
+      { time: 171.0, action: "", jp: "響かせようよ凱歌を", kr: "울려 퍼지게 하자 승리의 함성을", pron: "히비카세요-요 가이카오", call: "" },
+      { time: 174.5, action: "", jp: "どこまでも Ah", kr: "어디까지나 Ah", pron: "도코마데모 Ah", call: "" },
+      { time: 178.5, action: "", jp: "遮る物のない地平へ", kr: "가로막는 것 하나 없는 지평선으로", pron: "사에기루 모노노 나이 치헤이에", call: "" },
+      { time: 182.0, action: "", jp: "開かれた未来はもう", kr: "열린 미래는 이미", pron: "히라카레타 미라이와 모-", call: "" },
+      { time: 186.0, action: "", jp: "揺るぎのない Place", kr: "흔들림 없는 곳 (Place)", pron: "유루기노 나이 Place", call: "" },
+      { time: 189.5, action: "", jp: "天上天下そう讃えてる", kr: "천상천하 그렇게 칭송하고 있어", pron: "텐쇼-텐게 소- 타타에테루", call: "" },
+      { time: 194.0, action: "", jp: "I've got pride and dreams", kr: "I've got pride and dreams", pron: "I've got pride and dreams", call: "" },
+      { time: 198.0, action: "", jp: "さあ、笑顔を見せて", kr: "자, 환한 미소를 보여줘", pron: "사-, 에가오오 미세테", call: "" },
+      { time: 202.0, action: "", jp: "刻まれたんだ", kr: "깊이 새겨진 거야", pron: "키자마레탄다", call: "" },
+      { time: 205.5, action: "", jp: "My history, my victory！", kr: "My history, my victory!", pron: "My history, my victory!", call: "" },
+      { time: 215.0, action: "", jp: "響き渡れ凱歌よ (どこまでも)", kr: "울려 퍼져라 승리의 함성이여 (어디까지나)", pron: "히비키와타레 가이카요 (도코마데모)", call: "" },
+      { time: 221.5, action: "", jp: "開かれた未来はもう (この手へと)", kr: "열린 미래는 이미 (이 손으로)", pron: "히라카레타 미라이와 모- (코노 테에토)", call: "" },
+      { time: 228.0, action: "", jp: "Ms. VICTORIA", kr: "Ms. VICTORIA", pron: "미스 빅토리아", call: "" }
     ];
 
     let isEditing = false;
     let player = null;
-    let syncInterval = null;
+    let lastActiveIdx = -1;
 
+    // YouTube API 동적 로드
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('yt-player', {
+        videoId: 'vsnyQd6Ur-M',
+        playerVars: {
+          playsinline: 1,
+          rel: 0,
+          modestbranding: 1
+        },
         events: {
+          'onReady': () => {
+            document.getElementById('sync-status').textContent = '준비 완료 (재생 대기)';
+            // 끊김 없는 상시 폴링 루프 가동
+            startSyncLoop();
+          },
           'onStateChange': onPlayerStateChange
         }
       });
@@ -612,16 +450,16 @@
     function onPlayerStateChange(event) {
       const statusText = document.getElementById('sync-status');
       if (event.data === YT.PlayerState.PLAYING) {
-        statusText.textContent = "▶ LIVE SYNC";
-        if (!syncInterval) syncInterval = setInterval(updateSync, 100);
-      } else {
-        statusText.textContent = "⏸ PAUSED";
-        clearInterval(syncInterval);
-        syncInterval = null;
+        statusText.textContent = "▶ LIVE SYNCING";
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        statusText.textContent = "⏸ 일시정지";
+      } else if (event.data === YT.PlayerState.BUFFERING) {
+        statusText.textContent = "⏳ 버퍼링 중";
       }
     }
 
     function formatTime(sec) {
+      if (isNaN(sec) || sec < 0) sec = 0;
       const m = Math.floor(sec / 60);
       const s = (sec % 60).toFixed(1);
       return `${String(m).padStart(2, '0')}:${String(s).padStart(4, '0')}`;
@@ -638,28 +476,50 @@
       return parseFloat(str) || 0;
     }
 
-    function updateSync() {
-      if (!player || !player.getCurrentTime) return;
-      const cur = player.getCurrentTime();
-      const dur = player.getDuration() || 0;
-      document.getElementById('time-display').textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
-
-      let activeIdx = -1;
-      for (let i = 0; i < cardsData.length; i++) {
-        if (cur >= cardsData[i].time) activeIdx = i;
-        else break;
-      }
-
-      document.querySelectorAll('.lyric-card').forEach((card, idx) => {
-        if (idx === activeIdx) {
-          if (!card.classList.contains('active')) {
-            card.classList.add('active');
-            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        } else {
-          card.classList.remove('active');
+    // 0.1초 정밀 폴링 루프 (이벤트 누락 방지 완벽 대응)
+    function startSyncLoop() {
+      setInterval(() => {
+        if (!player || typeof player.getCurrentTime !== 'function') return;
+        
+        let cur = 0;
+        let dur = 0;
+        try {
+          cur = player.getCurrentTime() || 0;
+          dur = player.getDuration() || 0;
+        } catch (e) {
+          return;
         }
-      });
+
+        document.getElementById('time-display').textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+
+        // 현재 재생 시간에 해당하는 카드 탐색
+        let activeIdx = -1;
+        for (let i = 0; i < cardsData.length; i++) {
+          if (cur >= cardsData[i].time) {
+            activeIdx = i;
+          } else {
+            break;
+          }
+        }
+
+        if (activeIdx !== lastActiveIdx) {
+          lastActiveIdx = activeIdx;
+          const container = document.getElementById('cards-container');
+          const cards = container.querySelectorAll('.lyric-card');
+          
+          cards.forEach((card, idx) => {
+            if (idx === activeIdx) {
+              card.classList.add('active');
+              // 독립 스크롤 컨테이너 내부 중앙 정렬
+              const offsetTop = card.offsetTop - container.offsetTop;
+              const scrollTarget = offsetTop - (container.clientHeight / 2) + (card.clientHeight / 2);
+              container.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+            } else {
+              card.classList.remove('active');
+            }
+          });
+        }
+      }, 100);
     }
 
     function renderCards() {
@@ -670,7 +530,7 @@
 
       cardsData.forEach((item, index) => {
         const card = document.createElement('div');
-        card.className = 'lyric-card';
+        card.className = 'lyric-card' + (index === lastActiveIdx ? ' active' : '');
         card.dataset.index = index;
 
         card.innerHTML = `
@@ -678,7 +538,7 @@
             <div class="time-edit-box">
               <span class="badge-time" data-placeholder="00:00.0">[${formatTime(item.time)}]</span>
               <div class="card-tools">
-                <button class="btn-mini btn-sync-now" title="현재 시점으로 맞춤">⏱ 현시점</button>
+                <button class="btn-mini btn-sync-now" title="현재 재생 시점으로 맞춤">⏱ 현시점</button>
                 <button class="btn-mini btn-delete" title="카드 삭제">✕</button>
               </div>
             </div>
@@ -696,7 +556,9 @@
 
         card.addEventListener('click', () => {
           if (isEditing) return;
-          if (player && player.seekTo) player.seekTo(item.time, true);
+          if (player && typeof player.seekTo === 'function') {
+            player.seekTo(item.time, true);
+          }
         });
 
         const timeBadge = card.querySelector('.badge-time');
@@ -710,7 +572,7 @@
         const btnSyncNow = card.querySelector('.btn-sync-now');
         btnSyncNow.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (player && player.getCurrentTime) {
+          if (player && typeof player.getCurrentTime === 'function') {
             const cur = parseFloat(player.getCurrentTime().toFixed(1));
             cardsData[index].time = cur;
             timeBadge.innerText = `[${formatTime(cur)}]`;
@@ -736,7 +598,6 @@
       });
     }
 
-    // 편집 모드 토글
     document.getElementById('btn-toggle-edit').addEventListener('click', (e) => {
       isEditing = !isEditing;
       document.body.classList.toggle('is-editing', isEditing);
@@ -745,9 +606,11 @@
       renderCards();
     });
 
-    // 새 카드 추가
     document.getElementById('btn-add-card').addEventListener('click', () => {
-      const curTime = (player && player.getCurrentTime) ? player.getCurrentTime() : 0;
+      let curTime = 0;
+      if (player && typeof player.getCurrentTime === 'function') {
+        curTime = player.getCurrentTime();
+      }
       cardsData.push({
         time: parseFloat(curTime.toFixed(1)),
         action: "",
@@ -759,7 +622,6 @@
       renderCards();
     });
 
-    // 항목 표시/숨김 토글
     document.querySelectorAll('.toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const target = btn.dataset.target;
@@ -768,18 +630,17 @@
       });
     });
 
-    // JSON 내보내기
     document.getElementById('btn-export-json').addEventListener('click', () => {
       const blob = new Blob([JSON.stringify(cardsData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'ms_victoria_call_cards.json';
+      a.download = 'ms_victoria_1line_call_cards.json';
       a.click();
       URL.revokeObjectURL(url);
     });
 
-    // 초기 실행
+    // 최초 렌더링
     renderCards();
   </script>
 </body>
