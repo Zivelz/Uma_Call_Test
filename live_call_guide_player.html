@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Fix for YouTube Error 153 (embedder.identity.missing.referrer) -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>우마무스메 라이브 콜 가이드 플레이어 (Live Call Guide)</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            stage: {
+              950: '#07090e',
+              900: '#0f131d',
+              850: '#151b29',
+              800: '#1b2336',
+              700: '#27324d',
+              border: '#2a3652',
+            },
+            uma: {
+              gold: '#f59e0b',
+              amber: '#fbbf24',
+              cyan: '#00f0ff',
+              pink: '#ff1493',
+              green: '#10b981',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Custom Stage Scrollbars & Neon Highlights */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #07090e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #252f47;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00f0ff;
+    }
+    .neon-card-active {
+      box-shadow: 0 0 24px -2px rgba(0, 240, 255, 0.45), inset 0 0 16px -4px rgba(0, 240, 255, 0.2);
+      border-color: #00f0ff !important;
+    }
+    .text-glow-gold {
+      text-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+    }
+  </style>
+</head>
+<body class="bg-stage-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-uma-pink selection:text-white antialiased">
+
+  <header class="border-b border-stage-border bg-stage-900/95 backdrop-blur sticky top-0 z-40 px-4 lg:px-8 py-3.5 flex items-center justify-between shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-uma-pink via-purple-600 to-uma-cyan flex items-center justify-center shadow-lg shadow-uma-pink/25">
+        <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base lg:text-lg font-black tracking-tight bg-gradient-to-r from-uma-amber via-pink-400 to-uma-cyan bg-clip-text text-transparent">
+            ウマ娘 LIVE CALL GUIDE
+          </h1>
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-uma-cyan/10 text-uma-cyan border border-uma-cyan/30">v2.1 Sync</span>
+        </div>
+        <p class="text-xs text-slate-400">실시간 유튜브 싱크 & 5단 세로 라이브 콜 가이드 플레이어</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <button id="toggleEditModeBtn" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-stage-800 border border-stage-border hover:bg-stage-700 text-slate-200 transition">
+        <i data-lucide="edit-3" class="w-4 h-4 text-uma-cyan"></i>
+        <span>인라인 편집</span>
+      </button>
+      <button id="openEditorModalBtn" class="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white shadow-md shadow-sky-600/30 transition">
+        <i data-lucide="database" class="w-4 h-4"></i>
+        <span>데이터/시트 관리</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+    <!-- Left Column: Video Controls, Presets & Fallback Sync -->
+    <section class="lg:col-span-5 flex flex-col gap-4">
+      
+      <!-- Video Input & Presets Box -->
+      <div class="p-4 rounded-2xl bg-stage-900 border border-stage-border shadow-xl flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <label for="ytUrlInput" class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="youtube" class="w-4 h-4 text-rose-500"></i> 유튜브 영상 링크 / ID
+          </label>
+          <div class="flex items-center gap-1 text-[11px] text-slate-400">
+            <span>추천 프리셋:</span>
+            <button id="presetVictoriaBtn" class="px-2 py-0.5 rounded bg-stage-800 text-uma-amber hover:text-white border border-stage-border text-[11px] font-semibold transition">Ms. VICTORIA</button>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="ytUrlInput" 
+            value="https://www.youtube.com/watch?v=f2w4zT5N1iM" 
+            placeholder="예: https://www.youtube.com/watch?v=... 또는 영상 ID" 
+            class="flex-1 px-3 py-2 text-xs bg-stage-950 border border-stage-border rounded-xl focus:outline-none focus:border-uma-cyan transition text-slate-200 placeholder:text-slate-600 font-mono"
+          >
+          <button 
+            id="loadVideoBtn" 
+            class="px-4 py-2 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5 shrink-0"
+          >
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 로드
+          </button>
+        </div>
+
+        <!-- External Link & Error 153 Workaround Options -->
+        <div class="flex items-center justify-between pt-1 border-t border-stage-border/60 text-[11px]">
+          <span class="text-slate-400">임베드 차단 영상 대응:</span>
+          <div class="flex items-center gap-2">
+            <a 
+              id="openExternalYtLink" 
+              href="https://www.youtube.com/watch?v=f2w4zT5N1iM" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stage-800 text-slate-300 hover:text-white border border-stage-border hover:border-slate-500 transition"
+            >
+              <i data-lucide="external-link" class="w-3 h-3 text-rose-400"></i> 새 창에서 영상 열기
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- YouTube Player Container -->
+      <div class="rounded-2xl overflow-hidden bg-black aspect-video border border-stage-border relative shadow-2xl flex flex-col items-center justify-center">
+        <!-- Error Notice Overlay (Hidden by default, shown if error 153/150 occurs) -->
+        <div id="embedErrorOverlay" class="absolute inset-0 bg-stage-950/95 backdrop-blur-md z-20 flex-col items-center justify-center text-center p-6 hidden">
+          <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mb-3">
+            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1">유튜브 재생 오류 감지 (Error 153 / 150)</h4>
+          <p class="text-xs text-slate-300 mb-4 max-w-sm leading-relaxed">
+            영상 배급사의 외부 임베드 정책 제한입니다. 아래의 <span class="text-uma-cyan font-bold">'수동 타이머 싱크 모드'</span>를 켜고 유튜브는 새 창에서 재생하면 완벽하게 콜 가이드를 맞출 수 있습니다.
+          </p>
+          <div class="flex flex-wrap items-center justify-center gap-2">
+            <button id="switchToManualTimerBtn" class="px-3.5 py-2 bg-uma-cyan text-stage-950 text-xs font-bold rounded-xl shadow-lg hover:bg-sky-400 transition flex items-center gap-1.5">
+              <i data-lucide="timer" class="w-4 h-4"></i> 타이머 싱크 모드로 전환
+            </button>
+            <a id="errorExternalBtn" href="#" target="_blank" class="px-3.5 py-2 bg-stage-800 hover:bg-stage-700 text-xs text-slate-200 border border-stage-border rounded-xl transition flex items-center gap-1.5">
+              <i data-lucide="external-link" class="w-4 h-4 text-rose-400"></i> 유튜브에서 보기
+            </a>
+          </div>
+        </div>
+
+        <div id="playerContainer" class="w-full h-full">
+          <div id="player" class="w-full h-full"></div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-stage-900 border border-stage-border flex flex-col gap-3 shadow-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400">타임스탬프:</span>
+            <span id="currentTimeDisplay" class="font-mono text-base font-bold text-uma-cyan">00:00.0</span>
+          </div>
+
+          <!-- Play / Pause Buttons for Manual/Sync Mode -->
+          <div class="flex items-center gap-1.5">
+            <button id="playPauseBtn" class="px-3 py-1.5 bg-stage-800 hover:bg-stage-700 text-slate-200 border border-stage-border rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+              <i data-lucide="play" id="playPauseIcon" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span id="playPauseText">재생</span>
+            </button>
+            <button id="resetTimerBtn" class="p-1.5 bg-stage-800 hover:bg-stage-700 text-slate-400 hover:text-white border border-stage-border rounded-xl transition" title="처음으로 리셋">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Secondary creator utility row -->
+        <div class="pt-2 border-t border-stage-border/60 flex items-center gap-2">
+          <button id="addStampLineBtn" class="flex-1 py-2 px-3 bg-stage-800 hover:bg-stage-700 border border-stage-border text-xs rounded-xl font-medium flex items-center justify-center gap-1.5 transition text-slate-200">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-uma-green"></i>
+            <span>현재 시간에 새 단락 추가</span>
+          </button>
+          <button id="autoScrollToggle" class="px-3 py-2 bg-stage-800 hover:bg-stage-700 border border-stage-border text-xs rounded-xl font-medium flex items-center gap-1.5 transition text-uma-cyan" title="자동 스크롤 토글">
+            <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i>
+            <span id="autoScrollText">자동 스크롤 ON</span>
+          </button>
+        </div>
+
+        <!-- Legend -->
+        <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
+          <div class="bg-stage-950/70 p-2.5 rounded-xl border border-stage-border/50">
+            <span class="text-uma-amber font-bold block mb-0.5">🌟 5단 세로 구조</span>
+            <span class="text-slate-400 leading-snug">동작(액션) → 원문가사(JP) → 한국어번역(KR) → 독음(발음) → 콜(Call)</span>
+          </div>
+          <div class="bg-stage-950/70 p-2.5 rounded-xl border border-stage-border/50">
+            <span class="text-uma-cyan font-bold block mb-0.5">⚡ 바로 점프 &amp; 단축키</span>
+            <span class="text-slate-400 leading-snug">가사 카드 클릭 시 즉시 이동<br>[스페이스바] 재생/일시정지</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: 5-layer Vertical Call Timeline -->
+    <section class="lg:col-span-7 flex flex-col h-[calc(100vh-125px)] min-h-[550px]">
+      <div class="flex items-center justify-between pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-uma-cyan animate-pulse"></span>
+          <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">
+            라이브 콜 타임라인
+          </h2>
+          <span id="itemCountBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-stage-850 text-slate-300 border border-stage-border font-mono">
+            0개 단락
+          </span>
+        </div>
+        <span class="text-xs text-slate-400 flex items-center gap-1">
+          <i data-lucide="mouse-pointer-click" class="w-3.5 h-3.5 text-uma-cyan"></i> 단락 클릭 시 해당 시간으로 즉시 이동
+        </span>
+      </div>
+
+      <!-- Timeline Card Scroll Container -->
+      <div id="timelineContainer" class="flex-1 overflow-y-auto space-y-4 pr-1.5 relative scroll-smooth">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Editor & CSV/JSON Management Modal -->
+  <div id="editorModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-stage-900 border border-stage-border w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <div class="px-6 py-4 border-b border-stage-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="database" class="w-5 h-5 text-uma-cyan"></i>
+          <h3 class="font-bold text-slate-100">가이드 데이터 관리 (JSON / CSV)</h3>
+        </div>
+        <button id="closeEditorModalBtn" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 flex-1 overflow-y-auto space-y-4 text-xs">
+        <p class="text-slate-400 leading-relaxed">
+          지정하신 5단 구조(<span class="text-amber-300 font-semibold">동작/액션</span> ➔ <span class="text-white font-semibold">원문 JP</span> ➔ <span class="text-sky-300 font-semibold">번역 KR</span> ➔ <span class="text-purple-300 font-semibold">독음 Pronunciation</span> ➔ <span class="text-pink-400 font-semibold">콜 Call</span>)가 유지되는 JSON 데이터입니다.
+        </p>
+
+        <textarea id="rawJsonTextarea" class="w-full h-80 bg-stage-950 font-mono text-xs text-sky-200 p-4 border border-stage-border rounded-xl focus:outline-none focus:border-uma-cyan leading-relaxed" spellcheck="false"></textarea>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div class="flex gap-2">
+            <button id="exportCsvBtn" class="px-3.5 py-2 bg-stage-800 hover:bg-stage-700 border border-stage-border rounded-xl text-slate-300 flex items-center gap-1.5 transition">
+              <i data-lucide="table" class="w-4 h-4 text-uma-amber"></i> 스프레드시트(CSV) 내보내기
+            </button>
+            <button id="resetSampleBtn" class="px-3.5 py-2 bg-stage-800 hover:bg-stage-700 border border-stage-border rounded-xl text-slate-300 flex items-center gap-1.5 transition">
+              <i data-lucide="rotate-ccw" class="w-4 h-4 text-rose-400"></i> Ms. VICTORIA 원본 복원
+            </button>
+          </div>
+          <button id="applyJsonBtn" class="px-5 py-2 bg-uma-cyan text-stage-950 font-bold rounded-xl shadow-lg hover:bg-sky-400 transition flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i> 데이터 적용
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastBox" class="fixed bottom-6 right-6 z-50 transform translate-y-12 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-stage-850 border border-uma-cyan text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-xs">
+      <i data-lucide="info" class="w-4 h-4 text-uma-cyan"></i>
+      <span id="toastMsg">알림 메시지</span>
+    </div>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <script>
+    /* Default Initial Data for Ms. VICTORIA (5-stage Vertical Structure) */
+    const DEFAULT_GUIDE_DATA = [
+      {
+        id: "block_1",
+        time: 14.5,
+        action: "",
+        lyrics_jp: "勝鬨を上げよ 栄光の幕開けに",
+        lyrics_kr: "승리의 함성을 질러라 영광의 서막에",
+        pronunciation: "카치도키오 아게요 에-코-노 마쿠아케니",
+        call: ""
+      },
+      {
+        id: "block_2",
+        time: 21.0,
+        action: "",
+        lyrics_jp: "吹き荒れる風を裂いて",
+        lyrics_kr: "휘몰아치는 바람을 가르고",
+        pronunciation: "후키아레루 카제오 사이테",
+        call: ""
+      },
+      {
+        id: "block_3",
+        time: 27.2,
+        action: "",
+        lyrics_jp: "ひれ伏せ Ms. VICTORIA",
+        lyrics_kr: "무릎을 꿇어라 Ms. VICTORIA",
+        pronunciation: "히레후세 미스 빅토리아",
+        call: ""
+      },
+      {
+        id: "block_4",
+        time: 33.8,
+        action: "",
+        lyrics_jp: "頂へと駆け上がれ",
+        lyrics_kr: "정상을 향해 달려 올라가라",
+        pronunciation: "이타다키에토 카케아가레",
+        call: ""
+      },
+      {
+        id: "block_5",
+        time: 40.0,
+        action: "",
+        lyrics_jp: "誰よりも速く 届くまで",
+        lyrics_kr: "누구보다도 빠르게 닿을 때까지",
+        pronunciation: "다레요리모 하야쿠 토도쿠마데",
+        call: ""
+      }
+    ];
+
+    /* Application States */
+    let guideItems = JSON.parse(localStorage.getItem('uma_live_call_data_v2')) || DEFAULT_GUIDE_DATA;
+    let ytPlayer = null;
+    let isPlayerReady = false;
+    let syncInterval = null;
+    let currentActiveIndex = -1;
+    let isInlineEditMode = false;
+    let autoScrollEnabled = true;
+
+    // Fallback Manual Timer states
+    let isManualTimerMode = false;
+    let manualCurrentTime = 0;
+    let isManualPlaying = false;
+    let manualTimerInterval = null;
+    let lastManualTick = 0;
+
+    function showToast(message) {
+      const toast = document.getElementById('toastBox');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = message;
+      toast.classList.remove('translate-y-12', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-12', 'opacity-0');
+      }, 2500);
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds) || seconds < 0) seconds = 0;
+      const mins = Math.floor(seconds / 60);
+      const secs = (seconds % 60).toFixed(1);
+      const paddedMins = String(mins).padStart(2, '0');
+      const paddedSecs = secs < 10 ? '0' + secs : secs;
+      return `${paddedMins}:${paddedSecs}`;
+    }
+
+    function extractVideoId(urlOrId) {
+      if (!urlOrId) return 'f2w4zT5N1iM';
+      const clean = urlOrId.trim();
+      const match = clean.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+      return match ? match[1] : (clean.length === 11 ? clean : 'f2w4zT5N1iM');
+    }
+
+    function updateExternalLink(videoId) {
+      const targetUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      const extBtn = document.getElementById('openExternalYtLink');
+      const errBtn = document.getElementById('errorExternalBtn');
+      if (extBtn) extBtn.href = targetUrl;
+      if (errBtn) errBtn.href = targetUrl;
+    }
+
+    window.onYouTubeIframeAPIReady = function() {
+      initYouTubePlayer();
+    };
+
+    function initYouTubePlayer() {
+      const videoId = extractVideoId(document.getElementById('ytUrlInput').value);
+      updateExternalLink(videoId);
+
+      // Safe domain origin determination to avoid embedder.identity.missing.referrer
+      const currentOrigin = (window.location.origin && window.location.origin !== "null") 
+        ? window.location.origin 
+        : window.location.protocol + "//" + window.location.host;
+
+      try {
+        ytPlayer = new YT.Player('player', {
+          height: '100%',
+          width: '100%',
+          videoId: videoId,
+          // Use youtube-nocookie.com to minimize cross-domain cookie and referrer strictness issues
+          host: 'https://www.youtube-nocookie.com',
+          playerVars: {
+            origin: currentOrigin,
+            enablejsapi: 1,
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            widget_referrer: currentOrigin
+          },
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange,
+            'onError': onPlayerError
+          }
+        });
+      } catch(e) {
+        console.warn("YouTube player init error:", e);
+        showEmbedError();
+      }
+    }
+
+    function onPlayerReady(event) {
+      isPlayerReady = true;
+      document.getElementById('embedErrorOverlay').classList.add('hidden');
+      startSyncLoop();
+    }
+
+    function onPlayerStateChange(event) {
+      const playIcon = document.getElementById('playPauseIcon');
+      const playText = document.getElementById('playPauseText');
+
+      if (event.data === YT.PlayerState.PLAYING) {
+        startSyncLoop();
+        playText.textContent = "일시정지";
+        playIcon.setAttribute('data-lucide', 'pause');
+        playIcon.classList.remove('text-emerald-400');
+        playIcon.classList.add('text-amber-400');
+      } else {
+        playText.textContent = "재생";
+        playIcon.setAttribute('data-lucide', 'play');
+        playIcon.classList.add('text-emerald-400');
+        playIcon.classList.remove('text-amber-400');
+      }
+      lucide.createIcons();
+    }
+
+    function onPlayerError(event) {
+      console.warn("YouTube Player encountered error code:", event.data);
+      // Codes 150, 153, 101 indicate embedding forbidden or referrer identification failure
+      if ([150, 153, 101, 2, 5].includes(event.data)) {
+        showEmbedError();
+      }
+    }
+
+    function showEmbedError() {
+      const overlay = document.getElementById('embedErrorOverlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+    }
+
+    function startSyncLoop() {
+      if (syncInterval) clearInterval(syncInterval);
+      syncInterval = setInterval(() => {
+        if (isManualTimerMode) return;
+        if (!ytPlayer || !isPlayerReady || typeof ytPlayer.getCurrentTime !== 'function') return;
+
+        try {
+          const currentTime = ytPlayer.getCurrentTime();
+          document.getElementById('currentTimeDisplay').textContent = formatTime(currentTime);
+          updateActiveHighlight(currentTime);
+        } catch (e) {}
+      }, 100);
+    }
+
+    function togglePlayPause() {
+      if (isManualTimerMode) {
+        isManualPlaying = !isManualPlaying;
+        if (isManualPlaying) {
+          lastManualTick = performance.now();
+          manualTimerInterval = setInterval(() => {
+            const now = performance.now();
+            manualCurrentTime += (now - lastManualTick) / 1000;
+            lastManualTick = now;
+            document.getElementById('currentTimeDisplay').textContent = formatTime(manualCurrentTime);
+            updateActiveHighlight(manualCurrentTime);
+          }, 100);
+          document.getElementById('playPauseText').textContent = "일시정지";
+        } else {
+          clearInterval(manualTimerInterval);
+          document.getElementById('playPauseText').textContent = "재생";
+        }
+        return;
+      }
+
+      if (ytPlayer && isPlayerReady) {
+        const state = ytPlayer.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+          ytPlayer.pauseVideo();
+        } else {
+          ytPlayer.playVideo();
+        }
+      } else {
+        // Switch to manual mode seamlessly if player isn't available
+        activateManualTimerMode();
+        togglePlayPause();
+      }
+    }
+
+    function activateManualTimerMode() {
+      isManualTimerMode = true;
+      document.getElementById('embedErrorOverlay').classList.add('hidden');
+      showToast('수동 타이머 싱크 모드가 활성화되었습니다.');
+    }
+
+    function seekToTime(targetTime) {
+      if (isManualTimerMode) {
+        manualCurrentTime = targetTime;
+        document.getElementById('currentTimeDisplay').textContent = formatTime(manualCurrentTime);
+        updateActiveHighlight(manualCurrentTime);
+        return;
+      }
+
+      if (ytPlayer && isPlayerReady && typeof ytPlayer.seekTo === 'function') {
+        ytPlayer.seekTo(targetTime, true);
+        ytPlayer.playVideo();
+      } else {
+        manualCurrentTime = targetTime;
+        document.getElementById('currentTimeDisplay').textContent = formatTime(manualCurrentTime);
+        updateActiveHighlight(manualCurrentTime);
+      }
+    }
+
+    function renderTimeline() {
+      const container = document.getElementById('timelineContainer');
+      container.innerHTML = '';
+
+      document.getElementById('itemCountBadge').textContent = `${guideItems.length}개 단락`;
+
+      guideItems.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.id = `card-${index}`;
+        card.className = `p-4 rounded-2xl transition-all duration-300 border relative group cursor-pointer ${
+          index === currentActiveIndex 
+            ? 'bg-stage-900 neon-card-active scale-[1.01]' 
+            : 'bg-stage-900/60 border-stage-border hover:border-slate-500 hover:bg-stage-900'
+        }`;
+
+        card.addEventListener('click', (e) => {
+          if (e.target.tagName.toLowerCase() === 'input' || e.target.closest('button')) return;
+          seekToTime(item.time);
+        });
+
+        // 5-Stage Block Architecture:
+        // 1. 동작 / 액션 (Action / Blade)
+        // 2. 원문 가사 (JP)
+        // 3. 한국어 번역 (KR)
+        // 4. 발음 독음 (Pronunciation)
+        // 5. 콜 가이드 (Call)
+        card.innerHTML = `
+          <!-- Card Header & Timestamp -->
+          <div class="flex items-center justify-between border-b border-stage-border/60 pb-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 text-xs font-mono font-bold rounded-lg bg-stage-950 text-uma-cyan border border-stage-border">
+                ${formatTime(item.time)}
+              </span>
+              <span class="text-[11px] text-slate-400 font-semibold">PART #${index + 1}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button title="현재 싱크 시간으로 스탬프 업데이트" class="stamp-btn p-1.5 rounded-lg bg-stage-850 hover:bg-stage-800 text-slate-400 hover:text-uma-cyan transition border border-stage-border/40" data-index="${index}">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+              </button>
+              <button title="단락 삭제" class="delete-btn p-1.5 rounded-lg bg-stage-850 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 transition border border-stage-border/40" data-index="${index}">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <!-- 1. 동작 / 액션 (Action & Penlight) -->
+            <div class="bg-amber-950/20 border border-amber-500/30 rounded-xl p-2.5">
+              <div class="flex items-center gap-1.5 text-[11px] font-bold text-uma-amber mb-1">
+                <i data-lucide="zap" class="w-3.5 h-3.5"></i> 1. 동작 / 액션 (Action &amp; Blade)
+              </div>
+              ${isInlineEditMode ? `
+                <input type="text" data-field="action" data-index="${index}" value="${escapeHtml(item.action)}" placeholder="예: (펜라이트 앞뒤 바운스 / 색상: 오렌지)" class="w-full bg-stage-950 px-2.5 py-1.5 text-xs text-amber-200 border border-amber-500/40 rounded-lg focus:outline-none focus:border-uma-amber">
+              ` : `
+                <p class="text-xs ${item.action ? 'text-amber-200 font-medium' : 'text-slate-500 italic'}">
+                  ${item.action ? escapeHtml(item.action) : '(설정된 동작 없음 - 인라인 편집으로 입력)'}
+                </p>
+              `}
+            </div>
+
+            <!-- 2. 일본어 원문 (JP) -->
+            <div class="px-1">
+              <span class="text-[10px] text-slate-400 font-medium block mb-0.5">2. 일본어 가사 (JP)</span>
+              ${isInlineEditMode ? `
+                <input type="text" data-field="lyrics_jp" data-index="${index}" value="${escapeHtml(item.lyrics_jp)}" class="w-full bg-stage-950 px-2.5 py-1.5 text-sm font-bold text-white border border-stage-border rounded-lg focus:outline-none focus:border-uma-cyan">
+              ` : `
+                <p class="text-base font-black text-white tracking-wide leading-tight">${escapeHtml(item.lyrics_jp) || '—'}</p>
+              `}
+            </div>
+
+            <!-- 3. 한국어 번역 (KR) -->
+            <div class="px-1">
+              <span class="text-[10px] text-slate-400 font-medium block mb-0.5">3. 한국어 번역 (KR)</span>
+              ${isInlineEditMode ? `
+                <input type="text" data-field="lyrics_kr" data-index="${index}" value="${escapeHtml(item.lyrics_kr)}" class="w-full bg-stage-950 px-2.5 py-1.5 text-xs text-sky-200 border border-stage-border rounded-lg focus:outline-none focus:border-uma-cyan">
+              ` : `
+                <p class="text-xs text-sky-200/95 leading-relaxed font-medium">${escapeHtml(item.lyrics_kr) || '—'}</p>
+              `}
+            </div>
+
+            <!-- 4. 발음 독음 (Pronunciation) -->
+            <div class="px-1">
+              <span class="text-[10px] text-slate-400 font-medium block mb-0.5">4. 발음 독음 (Pronunciation)</span>
+              ${isInlineEditMode ? `
+                <input type="text" data-field="pronunciation" data-index="${index}" value="${escapeHtml(item.pronunciation)}" class="w-full bg-stage-950 px-2.5 py-1.5 text-xs text-purple-200 border border-stage-border rounded-lg focus:outline-none focus:border-uma-cyan">
+              ` : `
+                <p class="text-xs font-mono text-purple-300 font-semibold tracking-wide">${escapeHtml(item.pronunciation) || '—'}</p>
+              `}
+            </div>
+
+            <!-- 5. 콜 가이드 (Call) -->
+            <div class="bg-uma-pink/10 border border-uma-pink/30 rounded-xl p-2.5">
+              <div class="flex items-center gap-1.5 text-[11px] font-bold text-pink-400 mb-1">
+                <i data-lucide="megaphone" class="w-3.5 h-3.5"></i> 5. 콜 가이드 (Call)
+              </div>
+              ${isInlineEditMode ? `
+                <input type="text" data-field="call" data-index="${index}" value="${escapeHtml(item.call)}" placeholder="예: [하이! 하이!] [빅토리아!]" class="w-full bg-stage-950 px-2.5 py-1.5 text-xs text-pink-200 border border-pink-500/40 rounded-lg focus:outline-none focus:border-pink-400">
+              ` : `
+                <p class="text-xs ${item.call ? 'text-pink-300 font-black' : 'text-slate-500 italic'}">
+                  ${item.call ? escapeHtml(item.call) : '(설정된 콜 없음 - 인라인 편집으로 입력)'}
+                </p>
+              `}
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+      attachCardListeners();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function attachCardListeners() {
+      // Inline edit fields listener
+      document.querySelectorAll('input[data-field]').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const index = parseInt(e.target.dataset.index, 10);
+          const field = e.target.dataset.field;
+          guideItems[index][field] = e.target.value;
+          saveGuideData();
+        });
+      });
+
+      // Timestamp Sync buttons
+      document.querySelectorAll('.stamp-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const index = parseInt(btn.dataset.index, 10);
+          const curTime = isManualTimerMode 
+            ? Math.round(manualCurrentTime * 10) / 10 
+            : (ytPlayer && isPlayerReady ? Math.round(ytPlayer.getCurrentTime() * 10) / 10 : 0);
+          
+          guideItems[index].time = curTime;
+          sortGuideItems();
+          saveGuideData();
+          renderTimeline();
+          showToast(`파트 #${index + 1} 시간이 ${formatTime(curTime)}로 갱신되었습니다.`);
+        });
+      });
+
+      // Delete buttons
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const index = parseInt(btn.dataset.index, 10);
+          guideItems.splice(index, 1);
+          saveGuideData();
+          renderTimeline();
+          showToast(`단락이 삭제되었습니다.`);
+        });
+      });
+    }
+
+    function updateActiveHighlight(currentTime) {
+      if (!guideItems.length) return;
+
+      let activeIndex = -1;
+      for (let i = 0; i < guideItems.length; i++) {
+        if (currentTime >= guideItems[i].time) {
+          activeIndex = i;
+        } else {
+          break;
+        }
+      }
+
+      if (activeIndex !== currentActiveIndex) {
+        if (currentActiveIndex >= 0) {
+          const oldCard = document.getElementById(`card-${currentActiveIndex}`);
+          if (oldCard) {
+            oldCard.classList.remove('bg-stage-900', 'neon-card-active', 'scale-[1.01]');
+            oldCard.classList.add('bg-stage-900/60', 'border-stage-border');
+          }
+        }
+
+        currentActiveIndex = activeIndex;
+        if (currentActiveIndex >= 0) {
+          const newCard = document.getElementById(`card-${currentActiveIndex}`);
+          if (newCard) {
+            newCard.classList.remove('bg-stage-900/60', 'border-stage-border');
+            newCard.classList.add('bg-stage-900', 'neon-card-active', 'scale-[1.01]');
+
+            if (autoScrollEnabled) {
+              newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        }
+      }
+    }
+
+    function sortGuideItems() {
+      guideItems.sort((a, b) => a.time - b.time);
+    }
+
+    function saveGuideData() {
+      localStorage.setItem('uma_live_call_data_v2', JSON.stringify(guideItems));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTimeline();
+
+      // YouTube Load Action
+      document.getElementById('loadVideoBtn').addEventListener('click', () => {
+        const inputVal = document.getElementById('ytUrlInput').value.trim();
+        const videoId = extractVideoId(inputVal);
+        updateExternalLink(videoId);
+
+        if (ytPlayer && isPlayerReady && typeof ytPlayer.loadVideoById === 'function') {
+          try {
+            ytPlayer.loadVideoById(videoId);
+            document.getElementById('embedErrorOverlay').classList.add('hidden');
+            showToast(`영상 로드: ${videoId}`);
+          } catch(err) {
+            console.warn(err);
+            showEmbedError();
+          }
+        } else {
+          initYouTubePlayer();
+        }
+      });
+
+      // Preset Button: Ms. VICTORIA
+      document.getElementById('presetVictoriaBtn').addEventListener('click', () => {
+        const vid = 'f2w4zT5N1iM';
+        document.getElementById('ytUrlInput').value = `https://www.youtube.com/watch?v=${vid}`;
+        document.getElementById('loadVideoBtn').click();
+      });
+
+      // Fallback Switch Button
+      document.getElementById('switchToManualTimerBtn').addEventListener('click', () => {
+        activateManualTimerMode();
+      });
+
+      // Play/Pause Button
+      document.getElementById('playPauseBtn').addEventListener('click', togglePlayPause);
+
+      // Reset Timer Button
+      document.getElementById('resetTimerBtn').addEventListener('click', () => {
+        seekToTime(0);
+      });
+
+      // Keyboard Shortcut (Spacebar: Play/Pause)
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          togglePlayPause();
+        }
+      });
+
+      // Toggle Inline Edit
+      const toggleEditBtn = document.getElementById('toggleEditModeBtn');
+      toggleEditBtn.addEventListener('click', () => {
+        isInlineEditMode = !isInlineEditMode;
+        if (isInlineEditMode) {
+          toggleEditBtn.classList.add('bg-uma-cyan', 'text-stage-950');
+          toggleEditBtn.classList.remove('bg-stage-800', 'text-slate-200');
+          toggleEditBtn.querySelector('span').textContent = '인라인 편집 완료';
+        } else {
+          toggleEditBtn.classList.remove('bg-uma-cyan', 'text-stage-950');
+          toggleEditBtn.classList.add('bg-stage-800', 'text-slate-200');
+          toggleEditBtn.querySelector('span').textContent = '인라인 편집';
+        }
+        renderTimeline();
+      });
+
+      // Auto Scroll Toggle
+      const autoScrollBtn = document.getElementById('autoScrollToggle');
+      autoScrollBtn.addEventListener('click', () => {
+        autoScrollEnabled = !autoScrollEnabled;
+        const textSpan = document.getElementById('autoScrollText');
+        if (autoScrollEnabled) {
+          textSpan.textContent = '자동 스크롤 ON';
+          autoScrollBtn.classList.add('text-uma-cyan');
+          autoScrollBtn.classList.remove('text-slate-400');
+        } else {
+          textSpan.textContent = '자동 스크롤 OFF';
+          autoScrollBtn.classList.remove('text-uma-cyan');
+          autoScrollBtn.classList.add('text-slate-400');
+        }
+      });
+
+      // Add New Stamped Block
+      document.getElementById('addStampLineBtn').addEventListener('click', () => {
+        let cur = 0;
+        if (isManualTimerMode) {
+          cur = Math.round(manualCurrentTime * 10) / 10;
+        } else if (ytPlayer && isPlayerReady) {
+          cur = Math.round(ytPlayer.getCurrentTime() * 10) / 10;
+        }
+
+        const newBlock = {
+          id: 'block_' + Date.now(),
+          time: cur,
+          action: '',
+          lyrics_jp: '新しく追加した歌詞',
+          lyrics_kr: '새로 추가한 한국어 번역',
+          pronunciation: '발음 독음 입력',
+          call: ''
+        };
+        guideItems.push(newBlock);
+        sortGuideItems();
+        saveGuideData();
+        renderTimeline();
+        showToast(`${formatTime(cur)}에 새 단락이 추가되었습니다.`);
+      });
+
+      // Data Modal Management
+      const modal = document.getElementById('editorModal');
+      const rawJson = document.getElementById('rawJsonTextarea');
+
+      document.getElementById('openEditorModalBtn').addEventListener('click', () => {
+        rawJson.value = JSON.stringify(guideItems, null, 2);
+        modal.classList.remove('hidden');
+      });
+
+      document.getElementById('closeEditorModalBtn').addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
+
+      document.getElementById('applyJsonBtn').addEventListener('click', () => {
+        try {
+          const parsed = JSON.parse(rawJson.value);
+          if (Array.isArray(parsed)) {
+            guideItems = parsed;
+            sortGuideItems();
+            saveGuideData();
+            renderTimeline();
+            modal.classList.add('hidden');
+            showToast('데이터가 성공적으로 업데이트되었습니다.');
+          } else {
+            showToast('데이터는 배열 형식이어야 합니다.');
+          }
+        } catch(err) {
+          showToast('JSON 형식 오류: 다시 확인해 주세요.');
+        }
+      });
+
+      document.getElementById('resetSampleBtn').addEventListener('click', () => {
+        guideItems = JSON.parse(JSON.stringify(DEFAULT_GUIDE_DATA));
+        saveGuideData();
+        renderTimeline();
+        rawJson.value = JSON.stringify(guideItems, null, 2);
+        showToast('Ms. VICTORIA 기본 샘플로 복원되었습니다.');
+      });
+
+      // CSV Export
+      document.getElementById('exportCsvBtn').addEventListener('click', () => {
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        csvContent += "타임스탬프(초),동작/액션,원문가사(JP),한국어번역(KR),발음(독음),콜파트\n";
+        guideItems.forEach(item => {
+          const row = [
+            item.time,
+            `"${(item.action || '').replace(/"/g, '""')}"`,
+            `"${(item.lyrics_jp || '').replace(/"/g, '""')}"`,
+            `"${(item.lyrics_kr || '').replace(/"/g, '""')}"`,
+            `"${(item.pronunciation || '').replace(/"/g, '""')}"`,
+            `"${(item.call || '').replace(/"/g, '""')}"`
+          ].join(',');
+          csvContent += row + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `live_call_guide_${Date.now()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('스프레드시트용 CSV 다운로드가 완료되었습니다.');
+      });
+    });
+  </script>
+</body>
+</html>
