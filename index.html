@@ -353,7 +353,9 @@
         <button class="btn btn-primary" id="btn-toggle-edit">✏️ 가사/시간/콜 편집 켜기</button>
         <button class="btn btn-secondary" id="btn-add-card">➕ 현재 시점 카드 추가</button>
         <button class="btn btn-secondary" id="btn-export-json">💾 데이터 저장(JSON)</button>
+        <button class="btn btn-secondary" id="btn-import-json">📂 데이터 불러오기(JSON)</button>
       </div>
+      <input type="file" id="file-input" accept=".json" style="display: none;">
     </section>
 
     <section class="timeline-section" id="cards-container">
@@ -362,7 +364,7 @@
   </main>
 
   <script>
-    // 1줄 단위로 분할된 40개 정밀 카드 데이터
+    // 1줄 단위로 분할된 40여 개 카드 데이터
     let cardsData = [
       { time: 14.0, action: "", jp: "響き渡れ凱歌よ (どこまでも)", kr: "울려 퍼져라 승리의 함성이여 (어디까지나)", pron: "히비키와타레 가이카요 (도코마데모)", call: "" },
       { time: 21.0, action: "", jp: "開かれた未来はもう (この手へと)", kr: "열린 미래는 이미 (이 손으로)", pron: "히라카레타 미라이와 모- (코노 테에토)", call: "" },
@@ -423,7 +425,6 @@
     let player = null;
     let lastActiveIdx = -1;
 
-    // YouTube API 동적 로드
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
@@ -439,7 +440,6 @@
         events: {
           'onReady': () => {
             document.getElementById('sync-status').textContent = '준비 완료 (재생 대기)';
-            // 끊김 없는 상시 폴링 루프 가동
             startSyncLoop();
           },
           'onStateChange': onPlayerStateChange
@@ -449,6 +449,10 @@
 
     function onPlayerStateChange(event) {
       const statusText = document.getElementById('sync-status');
+      if (isEditing) {
+        statusText.textContent = "✏️ 편집 모드 (싱크 일시정지)";
+        return;
+      }
       if (event.data === YT.PlayerState.PLAYING) {
         statusText.textContent = "▶ LIVE SYNCING";
       } else if (event.data === YT.PlayerState.PAUSED) {
@@ -476,7 +480,7 @@
       return parseFloat(str) || 0;
     }
 
-    // 0.1초 정밀 폴링 루프 (이벤트 누락 방지 완벽 대응)
+    // 0.1초 고정밀 폴링 루프
     function startSyncLoop() {
       setInterval(() => {
         if (!player || typeof player.getCurrentTime !== 'function') return;
@@ -490,9 +494,12 @@
           return;
         }
 
+        // 시간 디스플레이는 상시 갱신
         document.getElementById('time-display').textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
 
-        // 현재 재생 시간에 해당하는 카드 탐색
+        // [핵심] 편집 모드 중에는 카드 전환 및 자동 스크롤을 완전히 차단
+        if (isEditing) return;
+
         let activeIdx = -1;
         for (let i = 0; i < cardsData.length; i++) {
           if (cur >= cardsData[i].time) {
@@ -510,7 +517,6 @@
           cards.forEach((card, idx) => {
             if (idx === activeIdx) {
               card.classList.add('active');
-              // 독립 스크롤 컨테이너 내부 중앙 정렬
               const offsetTop = card.offsetTop - container.offsetTop;
               const scrollTarget = offsetTop - (container.clientHeight / 2) + (card.clientHeight / 2);
               container.scrollTo({ top: scrollTarget, behavior: 'smooth' });
@@ -598,14 +604,26 @@
       });
     }
 
+    // 편집 모드 토글
     document.getElementById('btn-toggle-edit').addEventListener('click', (e) => {
       isEditing = !isEditing;
       document.body.classList.toggle('is-editing', isEditing);
-      e.target.textContent = isEditing ? '✅ 편집 완료 (시간순 정렬 및 저장)' : '✏️ 가사/시간/콜 편집 켜기';
-      e.target.style.background = isEditing ? '#059669' : '#2563eb';
+      
+      const statusText = document.getElementById('sync-status');
+      if (isEditing) {
+        statusText.textContent = "✏️ 편집 모드 (싱크 일시정지)";
+        e.target.textContent = '✅ 편집 완료 (시간순 정렬 및 저장)';
+        e.target.style.background = '#059669';
+      } else {
+        statusText.textContent = "▶ LIVE SYNCING";
+        e.target.textContent = '✏️ 가사/시간/콜 편집 켜기';
+        e.target.style.background = '#2563eb';
+        lastActiveIdx = -1; // 편집 모드 종료 시 재탐색
+      }
       renderCards();
     });
 
+    // 새 카드 추가
     document.getElementById('btn-add-card').addEventListener('click', () => {
       let curTime = 0;
       if (player && typeof player.getCurrentTime === 'function') {
@@ -622,6 +640,7 @@
       renderCards();
     });
 
+    // 항목 표시/숨김 토글
     document.querySelectorAll('.toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const target = btn.dataset.target;
@@ -630,6 +649,7 @@
       });
     });
 
+    // JSON 내보내기 (다운로드)
     document.getElementById('btn-export-json').addEventListener('click', () => {
       const blob = new Blob([JSON.stringify(cardsData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -638,6 +658,33 @@
       a.download = 'ms_victoria_1line_call_cards.json';
       a.click();
       URL.revokeObjectURL(url);
+    });
+
+    // JSON 파일 불러오기
+    document.getElementById('btn-import-json').addEventListener('click', () => {
+      document.getElementById('file-input').click();
+    });
+
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const loadedData = JSON.parse(event.target.result);
+          if (Array.isArray(loadedData)) {
+            cardsData = loadedData;
+            renderCards();
+            alert('데이터를 성공적으로 불러왔습니다!');
+          } else {
+            alert('올바른 카드 데이터 형식이 아닙니다.');
+          }
+        } catch (err) {
+          alert('JSON 파싱 오류가 발생했습니다.');
+        }
+      };
+      reader.readAsText(file);
     });
 
     // 최초 렌더링
